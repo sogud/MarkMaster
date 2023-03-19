@@ -36,6 +36,7 @@ const Popup = () => {
     <>
       <ul style={{ minWidth: "700px" }}>
         <li>Current URL: {currentURL}</li>
+        121212
         <li>Current Time: {new Date().toLocaleTimeString()}</li>
       </ul>
       <button
