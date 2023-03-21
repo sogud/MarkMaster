@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Button, Typography } from 'antd';
+import { Button, Typography, Modal, Input, Popover } from 'antd';
 import { getFaviconFromCache } from './utils';
 
 const { Paragraph } = Typography;
@@ -44,6 +44,76 @@ const TreeItem: React.FC<{ data: BookmarkItem; layout?: string }> = (props) => {
   );
 };
 
+const EditModal: React.FC<{
+  visible: boolean;
+  onCancel: () => void;
+  onOk: (title: string) => void;
+  title: string;
+}> = (props) => {
+  const { visible, onCancel, onOk, title } = props;
+  const [inputTitle, setInputTitle] = useState(title);
+
+  return (
+    <Modal
+      title="Edit Bookmark"
+      open={visible}
+      onOk={() => onOk(inputTitle)}
+      onCancel={onCancel}>
+      <Input
+        value={inputTitle}
+        onChange={(e) => setInputTitle(e.target.value)}
+      />
+    </Modal>
+  );
+};
+
+const Popup: React.FC<any> = ({ x, y, open, onClose = () => {} }) => {
+  const ref = useRef<any>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const popup = ref.current;
+      if (popup && !popup.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        display: open ? 'block' : 'none',
+        position: 'absolute',
+        top: y,
+        left: x,
+        width: 400,
+        height: 400,
+        backgroundColor: 'white',
+        border: '1px solid black',
+        borderRadius: 5,
+        zIndex: 9999
+      }}
+      className="flex flex-col h-full">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center">
+          <span className="ml-2 text-2xl font-bold">Bookmarks</span>
+        </div>
+        <Button
+          type="primary"
+          onClick={() => {}}>
+          New Folder
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const FolderIcon = (props: any) => (
   <svg
     fill="currentColor"
@@ -57,7 +127,6 @@ const FolderIcon = (props: any) => (
 const BackIcon = (props: any) => (
   <svg
     t="1679235244818"
-    class="icon"
     viewBox="0 0 1024 1024"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +136,7 @@ const BackIcon = (props: any) => (
     <path
       d="M471.893333 149.333333a42.666667 42.666667 0 0 0-73.258666-29.781333l-343.893334 352.981333a42.666667 42.666667 0 0 0-0.768 58.709334l343.893334 372.352a42.666667 42.666667 0 0 0 73.984-28.928v-190.677334c56.917333-5.248 116.821333-1.365333 179.882666 11.989334 65.834667 13.994667 150.528 76.032 253.909334 202.24a42.666667 42.666667 0 0 0 75.477333-31.36c-15.445333-152.32-73.984-281.301333-176.170667-384.853334-92.757333-93.994667-204.373333-146.432-333.098666-156.586666V149.333333z"
       fill="#000000"
-      fill-opacity=".85"
+      fillOpacity=".85"
       p-id="4546"></path>
   </svg>
 );
@@ -120,12 +189,17 @@ const Link: React.FC<{ data: BookmarkItem }> = (props) => {
     </a>
   );
 };
-const Folder: React.FC<{ data: BookmarkItem; onClick: any }> = (props) => {
-  const { data, onClick } = props;
+const Folder: React.FC<{
+  data: BookmarkItem;
+  onClick: any;
+  onContextMenu: any;
+}> = (props) => {
+  const { data, onClick, onContextMenu } = props;
 
   return (
     <>
       <div
+        onContextMenu={onContextMenu}
         onClick={onClick}
         className="sm:w-1/4 md:w-1/6 lg:w-1/12  p-2 flex flex-col justify-items-center 
                    items-center cursor-pointer fill-current
@@ -209,68 +283,115 @@ function Newtab() {
     }
   };
 
+  const handleCreateBookmark = () => {
+    chrome.bookmarks.create(
+      {
+        parentId: currentData.id,
+        title: 'New Bookmark',
+        url: 'https://www.google.com'
+      },
+      (newBookmark: any) => {
+        const newCurrentData = {
+          ...currentData,
+          children: currentData.children
+            ? [...currentData.children, newBookmark]
+            : [newBookmark]
+        };
+        setCurrentData(newCurrentData);
+      }
+    );
+  };
+
+  const [editVisible, setEditVisible] = useState(false);
+  const [XY, setXY] = useState({
+    x: 0,
+    y: 0
+  });
+  const [open, setOpen] = useState(false);
   return (
-    <div className="mx-auto pt-20">
-      <div
-        className="container mx-auto 
+    <>
+      <EditModal
+        visible={editVisible}
+        title={currentData.title}
+        onCancel={() => setEditVisible(false)}
+        onOk={() => setEditVisible(false)}
+      />
+      <Popup
+        onClose={() => setOpen(false)}
+        open={open}
+        x={XY.x}
+        y={XY.y}
+      />
+      <div className="mx-auto pt-20">
+        <div
+          className="container mx-auto 
                    p-8 rounded-lg bg-opacity-50
                    bg-white ">
-        <div className="flex justify-center items-center mb-8 text-blue-500">
-          {prevData.length > 0 && (
-            <>
-              <BackIcon
-                onClick={handleBackClick}
-                className="w-5 h-5 ml-4 fill-current
+          <div className="flex justify-center items-center mb-8 text-blue-500">
+            {prevData.length > 0 && (
+              <>
+                <BackIcon
+                  onClick={handleBackClick}
+                  className="w-5 h-5 ml-4 fill-current
                  cursor-pointer
                 "
-                style={{
-                  marginRight: 'auto'
-                }}
-              />
-              <Typography.Title
-                editable={{
-                  icon: (
-                    <EditIcon
-                      className="w-5 h-5 fill-current
+                  style={{
+                    marginRight: 'auto'
+                  }}
+                />
+                <Typography.Title
+                  editable={{
+                    icon: (
+                      <EditIcon
+                        className="w-5 h-5 fill-current
                                   cursor-pointer
                                 "
-                    />
-                  ),
-                  onChange: (value) => {
-                    handleChangeTitle(currentData.id, value);
-                  }
-                }}
-                level={2}
-                style={{ margin: 0, marginRight: 'auto' }}>
-                {currentData.title}
-              </Typography.Title>
-            </>
-          )}
-        </div>
+                      />
+                    ),
+                    onChange: (value) => {
+                      handleChangeTitle(currentData.id, value);
+                    }
+                  }}
+                  level={2}
+                  style={{ margin: 0, marginRight: 'auto' }}>
+                  {currentData.title}
+                </Typography.Title>
+              </>
+            )}
+          </div>
 
-        <div className="flex flex-wrap">
-          {currentData.children
-            ?.filter?.((item) => !item.url)
-            .map((bookmark) => {
-              return (
-                <Folder
-                  data={bookmark}
-                  key={bookmark.id}
-                  onClick={() => handleFolderClick(bookmark)}></Folder>
-              );
-            })}
-          {currentData.children
-            ?.filter?.((item) => item.url)
-            .map((bookmark) => {
-              return (
-                <Link
-                  data={bookmark}
-                  key={bookmark.id}></Link>
-              );
-            })}
+          <div className="flex flex-wrap">
+            {currentData.children
+              ?.filter?.((item) => !item.url)
+              .map((bookmark) => {
+                return (
+                  <Folder
+                    data={bookmark}
+                    key={bookmark.id}
+                    onContextMenu={(e: any) => {
+                      e.preventDefault();
+                      setXY({
+                        x: e.clientX,
+                        y: e.clientY
+                      });
+                      setOpen(true);
+                    }}
+                    onClick={() => handleFolderClick(bookmark)}></Folder>
+                );
+              })}
+            {currentData.children
+              ?.filter?.((item) => item.url)
+              .map((bookmark) => {
+                return (
+                  <Link
+                    data={bookmark}
+                    key={bookmark.id}></Link>
+                );
+              })}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
