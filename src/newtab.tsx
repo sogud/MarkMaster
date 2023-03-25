@@ -333,6 +333,50 @@ function Newtab() {
     y: 0
   });
   const [open, setOpen] = useState(false);
+
+  async function moveBookmark(bookmarkId: any, parentId: any, index: any) {
+    try {
+      await chrome.bookmarks.move(bookmarkId, {
+        parentId: parentId,
+        index: index
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const findItemById = (data: BookmarkItem[], id: any): BookmarkItem | null => {
+    for (const item of data) {
+      if (item.id === id) {
+        return item;
+      }
+      if (item.children) {
+        const result = findItemById(item.children, id);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    return null;
+  };
+  const moveSourceToDestination = (active: any, over?: any) => {
+    if (over && currentData.children) {
+      const source = findItemById(currentData.children, active.id);
+      console.log(over.data.current.sortable.index);
+      moveBookmark(
+        active.id,
+        source?.parentId,
+        over.data.current.sortable.index
+      );
+
+      // const destination = findItemById(currentData, destinationId);
+      // if (source && destination) {
+      //   const newCurrentData = moveItem(currentData, source, destination);
+      //   setCurrentData(newCurrentData);
+      // }
+    }
+  };
+
   return (
     <>
       <EditModal
@@ -348,8 +392,28 @@ function Newtab() {
         y={XY.y}
       />
       <DndContext
-        onDragEnd={(val) => {
-          console.log(val, 123123123);
+        onDragEnd={({ active, over }) => {
+          moveSourceToDestination(active, over);
+
+          // const oldIndex = movedBookmark.index;
+          // const newParentId = val.over?.data.current?.id || currentData.id;
+          // chrome.bookmarks.move(movedBookmark.id, {
+          //   index: 0,
+          //   parentId: newParentId
+          // });
+          // chrome.bookmarks.get(movedBookmark.id, (bookmarkArray: any) => {
+          //   const newBookmark = bookmarkArray[0];
+          // const newChildren = currentData.children?.map((item) => {
+          //   if (item.id === movedBookmark.id) {
+          //     return newBookmark;
+          //   }
+          //   return item;
+          // });
+          // setCurrentData({
+          //   ...currentData,
+          //   children: newChildren
+          // });
+          // });
         }}>
         <div className="mx-auto pt-20">
           <div
