@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Typography, Modal, Input, Popover } from 'antd';
 import { getFaviconFromCache } from './utils';
+import { DndContext } from '@dnd-kit/core';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const { Paragraph } = Typography;
 type BookmarkItem = {
@@ -190,6 +193,7 @@ const Link: React.FC<{ data: BookmarkItem }> = (props) => {
   );
 };
 const Folder: React.FC<{
+  className?: any;
   data: BookmarkItem;
   onClick: any;
   onContextMenu: any;
@@ -201,12 +205,13 @@ const Folder: React.FC<{
       <div
         onContextMenu={onContextMenu}
         onClick={onClick}
-        className="sm:w-1/4 md:w-1/6 lg:w-1/12  p-2 flex flex-col justify-items-center 
-                   items-center cursor-pointer fill-current
-                   text-blue-500 rounded-lg
-                   hover:bg-opacity-20
-                   hover:bg-white
-                   ">
+        className={`${props.className}
+        p-2
+        flex flex-col justify-items-center
+        items-center cursor-pointer fill-current
+                     text-blue-500 rounded-lg
+                     hover:bg-opacity-20
+                   hover:bg-white`}>
         <FolderIcon />
         <Paragraph
           className="text-center"
@@ -223,7 +228,27 @@ const Folder: React.FC<{
     </>
   );
 };
+function Droppable(props: any) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: props.id
+    });
 
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition
+  };
+
+  return (
+    <div
+      className={props.className}
+      style={style}
+      {...listeners}
+      ref={setNodeRef}>
+      {props.children}
+    </div>
+  );
+}
 function Newtab() {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [ohterBookmarks, setOhterBookmarks] = useState<BookmarkItem[]>([]);
@@ -322,75 +347,90 @@ function Newtab() {
         x={XY.x}
         y={XY.y}
       />
-      <div className="mx-auto pt-20">
-        <div
-          className="container mx-auto 
+      <DndContext
+        onDragEnd={(val) => {
+          console.log(val, 123123123);
+        }}>
+        <div className="mx-auto pt-20">
+          <div
+            className="container mx-auto 
                    p-8 rounded-lg bg-opacity-50
                    bg-white ">
-          <div className="flex justify-center items-center mb-8 text-blue-500">
-            {prevData.length > 0 && (
-              <>
-                <BackIcon
-                  onClick={handleBackClick}
-                  className="w-5 h-5 ml-4 fill-current
+            <div className="flex justify-center items-center mb-8 text-blue-500">
+              {prevData.length > 0 && (
+                <>
+                  <BackIcon
+                    onClick={handleBackClick}
+                    className="w-5 h-5 ml-4 fill-current
                  cursor-pointer
                 "
-                  style={{
-                    marginRight: 'auto'
-                  }}
-                />
-                <Typography.Title
-                  editable={{
-                    icon: (
-                      <EditIcon
-                        className="w-5 h-5 fill-current
+                    style={{
+                      marginRight: 'auto'
+                    }}
+                  />
+                  <Typography.Title
+                    editable={{
+                      icon: (
+                        <EditIcon
+                          className="w-5 h-5 fill-current
                                   cursor-pointer
                                 "
-                      />
-                    ),
-                    onChange: (value) => {
-                      handleChangeTitle(currentData.id, value);
-                    }
-                  }}
-                  level={2}
-                  style={{ margin: 0, marginRight: 'auto' }}>
-                  {currentData.title}
-                </Typography.Title>
-              </>
-            )}
-          </div>
-
-          <div className="flex flex-wrap">
-            {currentData.children
-              ?.filter?.((item) => !item.url)
-              .map((bookmark) => {
-                return (
-                  <Folder
-                    data={bookmark}
-                    key={bookmark.id}
-                    onContextMenu={(e: any) => {
-                      e.preventDefault();
-                      setXY({
-                        x: e.clientX,
-                        y: e.clientY
-                      });
-                      setOpen(true);
+                        />
+                      ),
+                      onChange: (value) => {
+                        handleChangeTitle(currentData.id, value);
+                      }
                     }}
-                    onClick={() => handleFolderClick(bookmark)}></Folder>
-                );
-              })}
-            {currentData.children
-              ?.filter?.((item) => item.url)
-              .map((bookmark) => {
-                return (
-                  <Link
-                    data={bookmark}
-                    key={bookmark.id}></Link>
-                );
-              })}
+                    level={2}
+                    style={{ margin: 0, marginRight: 'auto' }}>
+                    {currentData.title}
+                  </Typography.Title>
+                </>
+              )}
+            </div>
+
+            <div className="flex flex-wrap">
+              <SortableContext
+                items={
+                  currentData.children?.filter?.((item) => !item.url) as any
+                }>
+                {currentData.children
+                  ?.filter?.((item) => !item.url)
+                  .map((bookmark, index) => {
+                    return (
+                      <Droppable
+                        className={'sm:w-1/4 md:w-1/6 lg:w-1/12'}
+                        key={bookmark.id}
+                        id={bookmark.id}>
+                        <Folder
+                          data={bookmark}
+                          key={bookmark.id}
+                          onContextMenu={(e: any) => {
+                            e.preventDefault();
+                            setXY({
+                              x: e.clientX,
+                              y: e.clientY
+                            });
+                            setOpen(true);
+                          }}
+                          onClick={() => handleFolderClick(bookmark)}></Folder>
+                      </Droppable>
+                    );
+                  })}
+              </SortableContext>
+              {currentData.children
+                ?.filter?.((item) => item.url)
+                .map((bookmark) => {
+                  return (
+                    <Link
+                      data={bookmark}
+                      key={bookmark.id}></Link>
+                  );
+                })}
+            </div>
           </div>
         </div>
-      </div>
+      </DndContext>
     </>
   );
 }
