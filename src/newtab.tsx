@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import { Button, Typography, Modal, Input, Popover } from 'antd';
 import { getFaviconFromCache } from './utils';
 import { DndContext } from '@dnd-kit/core';
@@ -499,13 +499,13 @@ function Newtab() {
   );
 }
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(
   <React.StrictMode>
     <main
       className="w-full h-full min-h-screen
       bg-gradient-to-r from-green-400 to-blue-500">
       <Newtab />
     </main>
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );

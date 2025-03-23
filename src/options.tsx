@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 
 const Options = () => {
   const [color, setColor] = useState<string>("");
@@ -68,9 +68,9 @@ const Options = () => {
   );
 };
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+root.render(
   <React.StrictMode>
     <Options />
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );

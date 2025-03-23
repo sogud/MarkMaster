@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 
 const Popup = () => {
   const [count, setCount] = useState(0);
@@ -50,9 +50,9 @@ const Popup = () => {
   );
 };
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+root.render(
   <React.StrictMode>
     <Popup />
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );
