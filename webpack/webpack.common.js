@@ -37,10 +37,12 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              importLoaders: 1
+              importLoaders: 1,
+              modules: {
+                localIdentName: '[local]___[hash:base64:5]'
+              }
             }
-          },
-          'postcss-loader'
+          }
         ]
       }
     ]

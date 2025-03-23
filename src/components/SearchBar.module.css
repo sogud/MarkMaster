@@ -1,0 +1,76 @@
+.container {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  padding-left: 2.5rem;
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  outline: none;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 0 2px #3b82f6;
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), 0 0 #0000;
+  border-color: transparent;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.searchIconSvg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.clearButton {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.clearButton:hover {
+  color: #4b5563;
+}
+
+.clearButton:focus {
+  outline: none;
+}
+
+.clearButtonSvg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.searchingText {
+  position: absolute;
+  margin-top: 0.25rem;
+  width: 100%;
+  font-size: 0.75rem;
+  color: #6b7280;
+  padding-left: 0.5rem;
+}

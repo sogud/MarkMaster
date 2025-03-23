@@ -1,0 +1,107 @@
+.container {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.containerGrid {
+  width: 100%;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  transition: all 200ms;
+}
+
+.card:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.cardGrid {
+  padding: 1rem;
+  height: 100%;
+  transform: translateY(0);
+}
+
+.cardGrid:hover {
+  transform: translateY(-0.25rem);
+}
+
+.cardList {
+  padding: 0.75rem;
+}
+
+.cardList:hover {
+  transform: translateX(0.25rem);
+}
+
+.link {
+  display: block;
+}
+
+.linkGrid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+}
+
+.iconGrid {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title:hover {
+  color: #2563eb;
+}
+
+.titleGrid {
+  max-width: 120px;
+}
+
+.url {
+  font-size: 0.75rem;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.urlGrid {
+  max-width: 120px;
+}
+
+.listContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.listIconWrapper {
+  flex-shrink: 0;
+}
+
+.listTextWrapper {
+  flex: 1;
+  min-width: 0;
+}

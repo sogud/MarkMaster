@@ -1,6 +1,7 @@
 import React from "react";
 import { BookmarkFolder } from "../types";
 import { FolderIcon } from "./icons/FolderIcon";
+import styles from "./Folder.module.css";
 
 interface FolderProps {
   folder: BookmarkFolder;
@@ -21,48 +22,33 @@ const Folder: React.FC<FolderProps> = ({
   };
 
   return (
-    <div
-      className={
-        viewMode === "grid"
-          ? "w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-2"
-          : "w-full p-1"
-      }
-    >
+    <div className={viewMode === "grid" ? styles.containerGrid : styles.container}>
       <div
-        className={`
-          group bg-white hover:bg-gray-50 rounded-xl shadow-sm 
-          border border-gray-200 hover:border-gray-300 
-          transition-all duration-200
-          ${
-            viewMode === "grid"
-              ? "p-4 h-full transform hover:-translate-y-1 flex flex-col items-center justify-center text-center max-w-[200px]"
-              : "p-3 hover:translate-x-1"
-          }
-        `}
+        className={viewMode === "grid" ? styles.cardGrid : styles.cardList}
         onClick={handleClick}
       >
         {viewMode === "grid" ? (
           <>
-            <div className="relative mb-2">
-              <FolderIcon className="w-12 h-12 text-yellow-500" />
+            <div className={styles.iconWrapper}>
+              <FolderIcon className={styles.iconGrid} />
             </div>
-            <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 max-w-[120px]">
+            <p className={styles.titleGrid}>
               {folder.title}
             </p>
-            <p className="text-xs text-gray-500 truncate">
+            <p className={styles.count}>
               {folder.children?.length || 0} 个项目
             </p>
           </>
         ) : (
-          <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0">
-              <FolderIcon className="w-8 h-8 text-yellow-500" />
+          <div className={styles.listContent}>
+            <div className={styles.listIconWrapper}>
+              <FolderIcon className={styles.icon} />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">
+            <div className={styles.listTextWrapper}>
+              <p className={styles.title}>
                 {folder.title}
               </p>
-              <p className="text-xs text-gray-500 truncate">
+              <p className={styles.count}>
                 {folder.children?.length || 0} 个项目
               </p>
             </div>

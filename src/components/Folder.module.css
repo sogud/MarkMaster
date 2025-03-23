@@ -1,0 +1,106 @@
+.container {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.containerGrid {
+  composes: container;
+  width: 100%;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  transition: all 200ms;
+}
+
+.card:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.cardGrid {
+  composes: card;
+  padding: 1rem;
+  height: 100%;
+  transform: translateY(0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 200px;
+}
+
+.cardGrid:hover {
+  transform: translateY(-0.25rem);
+}
+
+.cardList {
+  composes: card;
+  padding: 0.75rem;
+}
+
+.cardList:hover {
+  transform: translateX(0.25rem);
+}
+
+.iconWrapper {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.icon {
+  width: 2rem;
+  height: 2rem;
+  color: #f59e0b;
+}
+
+.iconGrid {
+  composes: icon;
+  width: 3rem;
+  height: 3rem;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title:hover {
+  color: #2563eb;
+}
+
+.titleGrid {
+  composes: title;
+  max-width: 120px;
+}
+
+.count {
+  font-size: 0.75rem;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.listIconWrapper {
+  flex-shrink: 0;
+}
+
+.listTextWrapper {
+  flex: 1;
+  min-width: 0;
+}

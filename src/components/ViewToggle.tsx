@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './ViewToggle.module.css';
 
 interface ViewToggleProps {
   view: 'grid' | 'list';
@@ -7,16 +8,13 @@ interface ViewToggleProps {
 
 const ViewToggle: React.FC<ViewToggleProps> = ({ view, onViewChange }) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className={styles.container}>
       <button
         onClick={() => onViewChange('grid')}
-        className={`p-2 rounded-lg transition-colors duration-200
-          ${view === 'grid' 
-            ? 'text-blue-600 bg-blue-50' 
-            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+        className={view === 'grid' ? styles.buttonGridActive : styles.buttonGridInactive}
         title="网格视图"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                 d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
@@ -24,13 +22,10 @@ const ViewToggle: React.FC<ViewToggleProps> = ({ view, onViewChange }) => {
       
       <button
         onClick={() => onViewChange('list')}
-        className={`p-2 rounded-lg transition-colors duration-200
-          ${view === 'list' 
-            ? 'text-blue-600 bg-blue-50' 
-            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+        className={view === 'list' ? styles.buttonListActive : styles.buttonListInactive}
         title="列表视图"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                 d="M4 6h16M4 12h16M4 18h16" />
         </svg>

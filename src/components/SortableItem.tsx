@@ -1,6 +1,7 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import styles from "./SortableItem.module.css";
 
 interface SortableItemProps {
   id: string;
@@ -32,17 +33,7 @@ export const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
       style={style}
       {...listeners}
       {...attributes}
-      className={`
-        relative
-        ${
-          isDragging
-            ? "cursor-grabbing z-50 shadow-lg scale-105"
-            : "cursor-grab hover:scale-[1.02]"
-        }
-        touch-none select-none
-        transition-all duration-200 ease-in-out
-        rounded-lg
-      `}
+      className={`${styles.container} ${isDragging ? styles.dragging : ''}`}
     >
       {children}
     </div>

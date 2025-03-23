@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Bookmark, BookmarkFolder } from "../types";
+import styles from "./SearchBar.module.css";
 
 interface SearchBarProps {
   currentFolder: BookmarkFolder;
@@ -47,21 +48,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [searchTerm, currentFolder]);
 
   return (
-    <div className="relative mb-6">
-      <div className="relative">
+    <div className={styles.container}>
+      <div className={styles.inputWrapper}>
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="搜索书签..."
-          className="w-full px-4 py-2 pl-10 bg-white/60 backdrop-blur-sm
-                   border border-gray-200 rounded-lg shadow-sm
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                   placeholder-gray-400 text-sm"
+          className={styles.input}
         />
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+        <div className={styles.searchIcon}>
           <svg
-            className="w-4 h-4"
+            className={styles.searchIconSvg}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -77,11 +75,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
         {searchTerm && (
           <button
             onClick={() => setSearchTerm("")}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400
-                     hover:text-gray-600 focus:outline-none"
+            className={styles.clearButton}
           >
             <svg
-              className="w-4 h-4"
+              className={styles.clearButtonSvg}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -97,7 +94,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         )}
       </div>
       {isSearching && searchTerm && (
-        <div className="absolute mt-1 w-full text-xs text-gray-500 pl-2">
+        <div className={styles.searchingText}>
           正在搜索...
         </div>
       )}

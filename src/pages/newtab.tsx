@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
+import styles from "./newtab.module.css";
 import {
   DndContext,
   useSensor,
@@ -43,16 +44,16 @@ const EditModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-lg font-semibold mb-4">编辑书签</h2>
+    <div className={styles.modalOverlay}>
+      <div className={styles.modal}>
+        <h2 className={styles.modalTitle}>编辑书签</h2>
         <input
           type="text"
           value={inputTitle}
           onChange={(e) => setInputTitle(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-4"
+          className={styles.modalInput}
         />
-        <div className="flex justify-end space-x-2">
+        <div className={styles.modalFooter}>
           <Button variant="outline" onClick={onClose}>
             取消
           </Button>
@@ -184,27 +185,24 @@ function Newtab() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div
-          className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-6 
-                      transition-all duration-300 hover:shadow-lg"
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <div className={styles.card}
         >
           <SearchBar
             currentFolder={currentFolder}
             onSearchResult={setSearchResults}
           />
 
-          <div className="flex items-center justify-between mb-6 px-2">
-            <div className="flex items-center space-x-6">
+            <div className={styles.header}>
+              <div className={styles.navigation}>
               {folderHistory.length > 0 && (
                 <button
                   onClick={handleBack}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 
-                          rounded-full transition-colors duration-200"
+                  className={styles.backButton}
                 >
                   <svg
-                    className="w-5 h-5"
+                      className={styles.backIcon}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -218,7 +216,7 @@ function Newtab() {
                   </svg>
                 </button>
               )}
-              <div className="flex items-center space-x-2">
+              <div className={styles.breadcrumb}>
                 {folderHistory.map((folder, index) => (
                   <React.Fragment key={folder.id}>
                     <button
@@ -226,14 +224,14 @@ function Newtab() {
                         setCurrentFolder(folder);
                         setFolderHistory((prev) => prev.slice(0, index));
                       }}
-                      className="text-sm text-gray-600 hover:text-gray-900"
+                      className={styles.breadcrumbItem}
                     >
                       {folder.title}
                     </button>
-                    <span className="text-gray-400">/</span>
+                    <span className={styles.breadcrumbSeparator}>/</span>
                   </React.Fragment>
                 ))}
-                <h1 className="text-lg font-medium text-gray-900">
+                <h1 className={styles.currentFolder}>
                   {currentFolder.title}
                 </h1>
               </div>
@@ -253,13 +251,7 @@ function Newtab() {
             }}
           >
             <div
-              className={`
-                ${
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-                    : "flex flex-col space-y-2"
-                }
-              `}
+              className={viewMode === "grid" ? styles.gridContainer : styles.listContainer}
             >
               <SortableContext
                 items={(searchResults.length > 0
@@ -289,21 +281,21 @@ function Newtab() {
               </SortableContext>
 
               {searchResults.length > 0 && (
-                <div className="w-full text-center py-4 text-sm text-gray-500">
+                <div className={styles.searchResults}>
                   找到 {searchResults.length} 个结果
                 </div>
               )}
 
               {searchResults.length === 0 &&
                 currentFolder.children.length === 0 && (
-                  <div className="w-full text-center py-12">
-                    <p className="text-gray-500">当前文件夹为空</p>
+                  <div className={styles.emptyState}>
+                    <p className={styles.emptyStateText}>当前文件夹为空</p>
                   </div>
                 )}
             </div>
             <DragOverlay>
               {activeId ? (
-                <div className="opacity-35">
+                <div className={styles.dragOverlay}>
                   {(() => {
                     const item = [
                       ...currentFolder.children,

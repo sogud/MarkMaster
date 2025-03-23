@@ -1,0 +1,22 @@
+.container {
+  position: relative;
+  touch-action: none;
+  user-select: none;
+  transition: all 200ms ease-in-out;
+  border-radius: 0.5rem;
+}
+
+.container:not(.dragging) {
+  cursor: grab;
+}
+
+.container:not(.dragging):hover {
+  transform: scale(1.02);
+}
+
+.dragging {
+  cursor: grabbing;
+  z-index: 50;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: scale(1.05);
+}
