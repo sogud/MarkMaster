@@ -1,13 +1,28 @@
 {
-    "compilerOptions": {
-        "strict": true,
-        "module": "commonjs",
-        "target": "es6",
-        "esModuleInterop": true,
-        "sourceMap": false,
-        "rootDir": "src",
-        "outDir": "dist/js",
-        "noEmitOnError": true,
-        "jsx": "react",
+  "compilerOptions": {
+    "strict": true,
+    "module": "commonjs",
+    "target": "es6",
+    "esModuleInterop": true,
+    "sourceMap": false,
+    "rootDir": "src",
+    "outDir": "dist/js",
+    "noEmitOnError": true,
+    "jsx": "react",
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["components/*"],
+      "@pages/*": ["pages/*"],
+      "@utils/*": ["utils/*"],
+      "@types/*": ["types/*"],
+      "@hooks/*": ["hooks/*"]
     }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
