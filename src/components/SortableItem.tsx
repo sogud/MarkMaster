@@ -20,10 +20,14 @@ export const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 999 : 'auto',
-    position: isDragging ? 'relative' : 'static',
-    pointerEvents: isDragging ? 'none' : 'auto',
+    opacity: isDragging ? 0.7 : 1,
+    zIndex: isDragging ? 999 : 1,
+    position: 'relative',
+    touchAction: 'none',
+    WebkitTapHighlightColor: 'transparent',
+    WebkitTouchCallout: 'none',
+    WebkitUserSelect: 'none',
+    userSelect: 'none',
   } as const;
 
   return (
@@ -32,10 +36,12 @@ export const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
       style={style}
       {...listeners}
       {...attributes}
-      className={`relative z-0
-        ${isDragging ? 'cursor-grabbing z-50' : 'cursor-grab'}
+      className={`
+        relative
+        ${isDragging ? 'cursor-grabbing z-50 shadow-lg scale-105' : 'cursor-grab hover:scale-[1.02]'}
         touch-none select-none
-        transition-transform duration-200
+        transition-all duration-200 ease-in-out
+        rounded-lg
       `}
     >
       {children}

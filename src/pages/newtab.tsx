@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom/client';
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom/client";
 import {
   DndContext,
   useSensor,
@@ -9,17 +9,23 @@ import {
   defaultDropAnimationSideEffects,
   MeasuringStrategy,
   DragEndEvent,
-} from '@dnd-kit/core';
-import { SortableContext, arrayMove } from '@dnd-kit/sortable';
-import { getFaviconFromCache } from '../utils/utils';
-import { BookmarkFolder, Bookmark, convertToBookmark, ChromeBookmarkTreeNode } from '../types';
-import Folder from '../components/Folder';
-import Button from '../components/Button';
-import SortableItem from '../components/SortableItem';
-import SearchBar from '../components/SearchBar';
-import ViewToggle from '../components/ViewToggle';
+  DragStartEvent,
+} from "@dnd-kit/core";
+import { SortableContext, arrayMove } from "@dnd-kit/sortable";
+import { getFaviconFromCache } from "../utils/utils";
+import {
+  BookmarkFolder,
+  Bookmark,
+  convertToBookmark,
+  ChromeBookmarkTreeNode,
+} from "../types";
+import Folder from "../components/Folder";
+import Button from "../components/Button";
+import SortableItem from "../components/SortableItem";
+import SearchBar from "../components/SearchBar";
+import ViewToggle from "../components/ViewToggle";
 
-import Link from '../components/Link';
+import Link from "../components/Link";
 
 const EditModal: React.FC<{
   isOpen: boolean;
@@ -45,9 +51,7 @@ const EditModal: React.FC<{
           <Button variant="outline" onClick={onClose}>
             取消
           </Button>
-          <Button onClick={() => onSave(inputTitle)}>
-            保存
-          </Button>
+          <Button onClick={() => onSave(inputTitle)}>保存</Button>
         </div>
       </div>
     </div>
@@ -56,26 +60,27 @@ const EditModal: React.FC<{
 
 function Newtab() {
   const [currentFolder, setCurrentFolder] = useState<BookmarkFolder>({
-    id: '',
-    title: '',
+    id: "",
+    title: "",
     children: [],
     dateAdded: 0,
     dateGroupModified: 0,
-    index: 0
+    index: 0,
   });
 
   const [folderHistory, setFolderHistory] = useState<BookmarkFolder[]>([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<(Bookmark | BookmarkFolder)[]>([]);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
-    chrome.storage.sync.get({ viewMode: 'grid' }, (result) => {
+    chrome.storage.sync.get({ viewMode: "grid" }, (result) => {
       setViewMode(result.viewMode);
     });
   }, []);
 
-  const handleViewChange = (view: 'grid' | 'list') => {
+  const handleViewChange = (view: "grid" | "list") => {
     setViewMode(view);
     chrome.storage.sync.set({ viewMode: view });
   };
@@ -83,14 +88,14 @@ function Newtab() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5,
-        delay: 0,
-        tolerance: 5,
+        distance: 3,
+        tolerance: 8,
       },
     })
   );
 
-  const handleDragStart = () => {
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
     if (window.getSelection) {
       window.getSelection()?.removeAllRanges();
     }
@@ -121,12 +126,12 @@ function Newtab() {
 
   const handleTitleChange = (id: string, newTitle: string) => {
     chrome.bookmarks.update(id, { title: newTitle }, () => {
-      setCurrentFolder(prev => ({
+      setCurrentFolder((prev) => ({
         ...prev,
         title: id === prev.id ? newTitle : prev.title,
-        children: prev.children.map(child => 
+        children: prev.children.map((child) =>
           child.id === id ? { ...child, title: newTitle } : child
-        )
+        ),
       }));
     });
     setEditModalOpen(false);
@@ -134,35 +139,36 @@ function Newtab() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveId(null);
 
     if (!over || active.id === over.id) {
       return;
     }
-    
+
     const activeId = String(active.id);
     const overId = String(over.id);
-    
+
     const oldIndex = currentFolder.children.findIndex(item => item.id === activeId);
     const newIndex = currentFolder.children.findIndex(item => item.id === overId);
-    
-    if (oldIndex !== -1 && newIndex !== -1) {
-      const activeItem = currentFolder.children[oldIndex];
-      const overItem = currentFolder.children[newIndex];
-      
-      if (activeItem && overItem) {
-        const isSameType = 
-          ('url' in activeItem && 'url' in overItem) || 
-          (!('url' in activeItem) && !('url' in overItem));
 
-        if (isSameType) {
-          chrome.bookmarks.move(activeId, { index: newIndex }, () => {
-            setCurrentFolder(prev => ({
-              ...prev,
-              children: arrayMove(prev.children, oldIndex, newIndex)
-            }));
-          });
-        }
-      }
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const activeItem = currentFolder.children[oldIndex];
+    const overItem = currentFolder.children[newIndex];
+
+    if (!activeItem || !overItem) return;
+
+    const isSameType = 
+      ('url' in activeItem && 'url' in overItem) || 
+      (!('url' in activeItem) && !('url' in overItem));
+
+    if (isSameType) {
+      chrome.bookmarks.move(activeId, { index: newIndex }, () => {
+        setCurrentFolder(prev => ({
+          ...prev,
+          children: arrayMove(prev.children, oldIndex, newIndex)
+        }));
+      });
     }
   };
 
@@ -213,13 +219,9 @@ function Newtab() {
           </div>
 
           <DndContext 
-            sensors={sensors} 
+            sensors={sensors}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            autoScroll={{
-              enabled: true,
-              threshold: { x: 0, y: 0.2 }
-            }}
             measuring={{
               droppable: {
                 strategy: MeasuringStrategy.Always
@@ -228,15 +230,11 @@ function Newtab() {
           >
             <div 
               className={`
-                transition-all duration-300 ease-in-out
                 ${viewMode === 'grid' 
-                  ? 'flex flex-wrap -mx-2' 
-                  : 'flex flex-col divide-y divide-gray-100'
+                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4' 
+                  : 'flex flex-col space-y-2'
                 }
               `}
-              style={{
-                minHeight: currentFolder.children.length === 0 ? 'auto' : '200px'
-              }}
             >
               <SortableContext 
                 items={(searchResults.length > 0 ? searchResults : currentFolder.children)
@@ -283,7 +281,7 @@ function Newtab() {
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   <React.StrictMode>
     <Newtab />

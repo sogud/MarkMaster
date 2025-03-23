@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Bookmark } from "../types";
 
 interface LinkProps {
@@ -8,8 +8,6 @@ interface LinkProps {
 
 const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
   const [faviconUrl, setFaviconUrl] = useState("");
-  const isDragging = useRef(false);
-  const startPos = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const getFavicon = async () => {
@@ -28,26 +26,8 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
     getFavicon();
   }, [data.url]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = false;
-    startPos.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (e.buttons === 1) {
-      const dx = Math.abs(e.clientX - startPos.current.x);
-      const dy = Math.abs(e.clientY - startPos.current.y);
-      if (dx > 5 || dy > 5) {
-        isDragging.current = true;
-      }
-    }
-  };
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isDragging.current) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
@@ -59,7 +39,7 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
       }
     >
       <div
-        className={`relative group bg-white hover:bg-gray-50 rounded-xl shadow-sm 
+        className={`group bg-white hover:bg-gray-50 rounded-xl shadow-sm 
                   border border-gray-200 hover:border-gray-300 
                   transition-all duration-200
                   ${
@@ -68,25 +48,22 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
                       : "p-3 hover:translate-x-1"
                   }`}
       >
-        <div className="absolute inset-0 cursor-grab active:cursor-grabbing opacity-0" />
         <a
           href={data.url}
           target="_blank"
           rel="noopener noreferrer"
-          className={`block relative z-10 ${
+          className={`block ${
             viewMode === "grid"
               ? "flex flex-col items-center justify-center text-center"
               : ""
           }`}
           title={data.title}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
           onClick={handleClick}
         >
           {viewMode === "grid" ? (
             <>
               <img
-                className="w-12 h-12 rounded-lg mb-2 pointer-events-none"
+                className="w-12 h-12 rounded-lg mb-2"
                 src={
                   faviconUrl ||
                   `https://www.google.com/s2/favicons?domain=${data.url}&sz=128`
@@ -94,10 +71,10 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
                 alt=""
                 draggable={false}
               />
-              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 max-w-[120px] pointer-events-none">
+              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 max-w-[120px]">
                 {data.title.length > 20 ? `${data.title.slice(0, 20)}...` : data.title}
               </p>
-              <p className="text-xs text-gray-500 truncate max-w-[120px] pointer-events-none">
+              <p className="text-xs text-gray-500 truncate max-w-[120px]">
                 {new URL(data.url).hostname.replace("www.", "")}
               </p>
             </>
@@ -105,7 +82,7 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 <img
-                  className="w-8 h-8 rounded-lg pointer-events-none"
+                  className="w-8 h-8 rounded-lg"
                   src={
                     faviconUrl ||
                     `https://www.google.com/s2/favicons?domain=${data.url}&sz=128`
@@ -115,10 +92,10 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 pointer-events-none">
+                <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">
                   {data.title.length > 20 ? `${data.title.slice(0, 20)}...` : data.title}
                 </p>
-                <p className="text-xs text-gray-500 truncate pointer-events-none">
+                <p className="text-xs text-gray-500 truncate">
                   {new URL(data.url).hostname.replace("www.", "")}
                 </p>
               </div>
