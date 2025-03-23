@@ -1,7 +1,13 @@
 {
-  "name": "bookmark-ui",
+  "name": "MarkMaster",
   "version": "1.0.0",
-  "description": "bookmark-ui",
+  "description": "MarkMaster - A bookmark management tool that helps you organize and manage your bookmarks efficiently.",
+  "keywords": [
+    "bookmark",
+    "management",
+    "tool",
+    "chrome-extension"
+  ],
   "main": "index.js",
   "scripts": {
     "watch": "webpack --config webpack/webpack.dev.js --watch",
