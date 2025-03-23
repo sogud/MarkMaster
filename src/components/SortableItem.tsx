@@ -1,6 +1,6 @@
-import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import React from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface SortableItemProps {
   id: string;
@@ -19,15 +19,11 @@ export const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.7 : 1,
+    transition: isDragging ? undefined : transition,
     zIndex: isDragging ? 999 : 1,
-    position: 'relative',
-    touchAction: 'none',
-    WebkitTapHighlightColor: 'transparent',
-    WebkitTouchCallout: 'none',
-    WebkitUserSelect: 'none',
-    userSelect: 'none',
+    position: "relative",
+    touchAction: "none",
+    willChange: isDragging ? "transform" : undefined,
   } as const;
 
   return (
@@ -38,7 +34,11 @@ export const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
       {...attributes}
       className={`
         relative
-        ${isDragging ? 'cursor-grabbing z-50 shadow-lg scale-105' : 'cursor-grab hover:scale-[1.02]'}
+        ${
+          isDragging
+            ? "cursor-grabbing z-50 shadow-lg scale-105"
+            : "cursor-grab hover:scale-[1.02]"
+        }
         touch-none select-none
         transition-all duration-200 ease-in-out
         rounded-lg

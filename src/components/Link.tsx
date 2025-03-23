@@ -72,7 +72,9 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
                 draggable={false}
               />
               <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 max-w-[120px]">
-                {data.title.length > 20 ? `${data.title.slice(0, 20)}...` : data.title}
+                {data.title.length > 7
+                  ? `${data.title.slice(0, 7)}...`
+                  : data.title}
               </p>
               <p className="text-xs text-gray-500 truncate max-w-[120px]">
                 {new URL(data.url).hostname.replace("www.", "")}
@@ -93,7 +95,9 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">
-                  {data.title.length > 20 ? `${data.title.slice(0, 20)}...` : data.title}
+                  {data.title.length > 20
+                    ? `${data.title.slice(0, 20)}...`
+                    : data.title}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {new URL(data.url).hostname.replace("www.", "")}

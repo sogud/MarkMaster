@@ -10,8 +10,13 @@ import {
   MeasuringStrategy,
   DragEndEvent,
   DragStartEvent,
+  closestCenter,
 } from "@dnd-kit/core";
-import { SortableContext, arrayMove } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 import { getFaviconFromCache } from "../utils/utils";
 import {
   BookmarkFolder,
@@ -70,7 +75,9 @@ function Newtab() {
 
   const [folderHistory, setFolderHistory] = useState<BookmarkFolder[]>([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [searchResults, setSearchResults] = useState<(Bookmark | BookmarkFolder)[]>([]);
+  const [searchResults, setSearchResults] = useState<
+    (Bookmark | BookmarkFolder)[]
+  >([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -148,8 +155,12 @@ function Newtab() {
     const activeId = String(active.id);
     const overId = String(over.id);
 
-    const oldIndex = currentFolder.children.findIndex(item => item.id === activeId);
-    const newIndex = currentFolder.children.findIndex(item => item.id === overId);
+    const oldIndex = currentFolder.children.findIndex(
+      (item) => item.id === activeId
+    );
+    const newIndex = currentFolder.children.findIndex(
+      (item) => item.id === overId
+    );
 
     if (oldIndex === -1 || newIndex === -1) return;
 
@@ -158,15 +169,15 @@ function Newtab() {
 
     if (!activeItem || !overItem) return;
 
-    const isSameType = 
-      ('url' in activeItem && 'url' in overItem) || 
-      (!('url' in activeItem) && !('url' in overItem));
+    const isSameType =
+      ("url" in activeItem && "url" in overItem) ||
+      (!("url" in activeItem) && !("url" in overItem));
 
     if (isSameType) {
       chrome.bookmarks.move(activeId, { index: newIndex }, () => {
-        setCurrentFolder(prev => ({
+        setCurrentFolder((prev) => ({
           ...prev,
-          children: arrayMove(prev.children, oldIndex, newIndex)
+          children: arrayMove(prev.children, oldIndex, newIndex),
         }));
       });
     }
@@ -175,13 +186,15 @@ function Newtab() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-6 
-                      transition-all duration-300 hover:shadow-lg">
+        <div
+          className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-6 
+                      transition-all duration-300 hover:shadow-lg"
+        >
           <SearchBar
             currentFolder={currentFolder}
             onSearchResult={setSearchResults}
           />
-          
+
           <div className="flex items-center justify-between mb-6 px-2">
             <div className="flex items-center space-x-6">
               {folderHistory.length > 0 && (
@@ -190,18 +203,28 @@ function Newtab() {
                   className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 
                           rounded-full transition-colors duration-200"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
                   </svg>
                 </button>
               )}
               <div className="flex items-center space-x-2">
                 {folderHistory.map((folder, index) => (
                   <React.Fragment key={folder.id}>
-                    <button 
+                    <button
                       onClick={() => {
                         setCurrentFolder(folder);
-                        setFolderHistory(prev => prev.slice(0, index));
+                        setFolderHistory((prev) => prev.slice(0, index));
                       }}
                       className="text-sm text-gray-600 hover:text-gray-900"
                     >
@@ -218,55 +241,87 @@ function Newtab() {
             <ViewToggle view={viewMode} onViewChange={handleViewChange} />
           </div>
 
-          <DndContext 
+          <DndContext
             sensors={sensors}
+            collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             measuring={{
               droppable: {
-                strategy: MeasuringStrategy.Always
-              }
+                strategy: MeasuringStrategy.Always,
+              },
             }}
           >
-            <div 
+            <div
               className={`
-                ${viewMode === 'grid' 
-                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4' 
-                  : 'flex flex-col space-y-2'
+                ${
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+                    : "flex flex-col space-y-2"
                 }
               `}
             >
-              <SortableContext 
-                items={(searchResults.length > 0 ? searchResults : currentFolder.children)
-                  .map(item => item.id)}
+              <SortableContext
+                items={(searchResults.length > 0
+                  ? searchResults
+                  : currentFolder.children
+                ).map((item) => item.id)}
+                strategy={rectSortingStrategy}
               >
-                {(searchResults.length > 0 ? searchResults : currentFolder.children).map((item) => (
+                {(searchResults.length > 0
+                  ? searchResults
+                  : currentFolder.children
+                ).map((item) => (
                   <SortableItem key={item.id} id={item.id}>
-                    {'url' in item ? (
+                    {"url" in item ? (
                       <Link data={item as Bookmark} viewMode={viewMode} />
                     ) : (
                       <Folder
                         folder={item as BookmarkFolder}
-                        onFolderClick={() => handleFolderClick(item as BookmarkFolder)}
+                        onFolderClick={() =>
+                          handleFolderClick(item as BookmarkFolder)
+                        }
                         viewMode={viewMode}
                       />
                     )}
                   </SortableItem>
                 ))}
               </SortableContext>
-              
+
               {searchResults.length > 0 && (
                 <div className="w-full text-center py-4 text-sm text-gray-500">
                   找到 {searchResults.length} 个结果
                 </div>
               )}
-              
-              {searchResults.length === 0 && currentFolder.children.length === 0 && (
-                <div className="w-full text-center py-12">
-                  <p className="text-gray-500">当前文件夹为空</p>
-                </div>
-              )}
+
+              {searchResults.length === 0 &&
+                currentFolder.children.length === 0 && (
+                  <div className="w-full text-center py-12">
+                    <p className="text-gray-500">当前文件夹为空</p>
+                  </div>
+                )}
             </div>
+            <DragOverlay>
+              {activeId ? (
+                <div className="opacity-35">
+                  {(() => {
+                    const item = [
+                      ...currentFolder.children,
+                      ...searchResults,
+                    ].find((item) => item.id === activeId);
+                    if (!item) return null;
+                    return "url" in item ? (
+                      <Link data={item as Bookmark} viewMode={viewMode} />
+                    ) : (
+                      <Folder
+                        folder={item as BookmarkFolder}
+                        viewMode={viewMode}
+                      />
+                    );
+                  })()}
+                </div>
+              ) : null}
+            </DragOverlay>
           </DndContext>
         </div>
       </div>
@@ -281,7 +336,9 @@ function Newtab() {
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement
+);
 root.render(
   <React.StrictMode>
     <Newtab />
