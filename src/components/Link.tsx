@@ -1,14 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { Bookmark } from "../types";
 import styles from "./Link.module.css";
+import ContextMenu from "./ContextMenu";
 
 interface LinkProps {
   data: Bookmark;
   viewMode: "grid" | "list";
+  onUpdateBookmark?: (id: string, newTitle: string) => void;
+  onDeleteBookmark?: (id: string) => void;
 }
 
-const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
+const Link: React.FC<LinkProps> = ({ 
+  data, 
+  viewMode, 
+  onUpdateBookmark, 
+  onDeleteBookmark 
+}) => {
   const [faviconUrl, setFaviconUrl] = useState("");
+  const [contextMenu, setContextMenu] = useState({
+    isOpen: false,
+    x: 0,
+    y: 0,
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(data.title);
 
   useEffect(() => {
     const getFavicon = async () => {
@@ -31,8 +46,91 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
     e.stopPropagation();
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    // 阻止默认的浏览器右键菜单
+    e.preventDefault();
+    // 阻止事件冒泡到父元素
+    e.stopPropagation();
+    
+    // 直接设置菜单状态，新的 ContextMenu 组件会处理其他逻辑
+    setContextMenu({
+      isOpen: true,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu({
+      ...contextMenu,
+      isOpen: false,
+    });
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    handleCloseContextMenu();
+  };
+
+  const handleDelete = () => {
+    if (onDeleteBookmark) {
+      onDeleteBookmark(data.id);
+    }
+    handleCloseContextMenu();
+  };
+
+  const handleSaveEdit = () => {
+    if (onUpdateBookmark) {
+      onUpdateBookmark(data.id, editTitle);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditTitle(data.title);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSaveEdit();
+    } else if (e.key === "Escape") {
+      handleCancelEdit();
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className={viewMode === "grid" ? styles.containerGrid : styles.container}>
+        <div className={viewMode === "grid" ? styles.cardGrid : styles.cardList}>
+          <div className={styles.editContainer}>
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              className={styles.editInput}
+            />
+            <div className={styles.editButtons}>
+              <button onClick={handleSaveEdit} className={styles.saveButton}>
+                保存
+              </button>
+              <button onClick={handleCancelEdit} className={styles.cancelButton}>
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={viewMode === "grid" ? styles.containerGrid : styles.container}>
+    <div 
+      className={viewMode === "grid" ? styles.containerGrid : styles.container}
+      onContextMenu={handleContextMenu}
+    >
       <div className={viewMode === "grid" ? styles.cardGrid : styles.cardList}>
         <a
           href={data.url}
@@ -89,6 +187,14 @@ const Link: React.FC<LinkProps> = ({ data, viewMode }) => {
           )}
         </a>
       </div>
+      <ContextMenu
+        x={contextMenu.x}
+        y={contextMenu.y}
+        isOpen={contextMenu.isOpen}
+        onClose={handleCloseContextMenu}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </div>
   );
 };

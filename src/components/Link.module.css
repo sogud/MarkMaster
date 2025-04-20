@@ -105,3 +105,50 @@
   flex: 1;
   min-width: 0;
 }
+
+.editContainer {
+  padding: 8px;
+  width: 100%;
+}
+
+.editInput {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.editButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.saveButton, .cancelButton {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+}
+
+.saveButton {
+  background-color: #4caf50;
+  color: white;
+}
+
+.cancelButton {
+  background-color: #f44336;
+  color: white;
+}
+
+/* 深色模式 */
+@media (prefers-color-scheme: dark) {
+  .editInput {
+    background-color: #333;
+    color: white;
+    border-color: #555;
+  }
+}

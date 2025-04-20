@@ -27,6 +27,12 @@ export const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
     willChange: isDragging ? "transform" : undefined,
   } as const;
 
+  // 自定义处理右键点击事件，防止拖拽监听器干扰右键菜单
+  const handleContextMenu = (e: React.MouseEvent) => {
+    // 阻止事件冒泡到 SortableItem 的拖拽监听器
+    e.stopPropagation();
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -34,6 +40,7 @@ export const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
       {...listeners}
       {...attributes}
       className={`${styles.container} ${isDragging ? styles.dragging : ''}`}
+      onContextMenu={handleContextMenu}
     >
       {children}
     </div>

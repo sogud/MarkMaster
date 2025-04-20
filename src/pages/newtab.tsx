@@ -95,9 +95,11 @@ function Newtab() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
+      // 只在左键点击时激活拖拽功能，右键点击时不触发拖拽
       activationConstraint: {
         distance: 3,
         tolerance: 8,
+        // 注意：mouseButtons 不是标准属性，我们使用其他方式处理右键点击
       },
     })
   );
@@ -145,6 +147,147 @@ function Newtab() {
     setEditModalOpen(false);
   };
 
+  const handleUpdateBookmark = (id: string, newTitle: string) => {
+    chrome.bookmarks.update(id, { title: newTitle }, () => {
+      // 使用函数式更新确保状态正确更新
+      setCurrentFolder(prev => {
+        const updatedFolder = {
+          ...prev,
+          children: prev.children.map(child =>
+            child.id === id ? { ...child, title: newTitle } : child
+          ),
+        };
+        // 强制触发重新渲染
+        return updatedFolder;
+      });
+
+      // 更新搜索结果中的书签标题
+      if (searchResults.length > 0) {
+        setSearchResults(prev => {
+          const updatedResults = prev.map(item =>
+            item.id === id ? { ...item, title: newTitle } : item
+          );
+          // 强制触发重新渲染
+          return [...updatedResults];
+        });
+      }
+      
+      // 强制触发重新渲染
+      setTimeout(() => {
+        setCurrentFolder(prev => ({...prev}));
+      }, 0);
+    });
+  };
+
+  const handleDeleteBookmark = (id: string) => {
+    chrome.bookmarks.remove(id, () => {
+      // 从当前文件夹中移除书签
+      setCurrentFolder(prev => {
+        const updatedFolder = {
+          ...prev,
+          children: prev.children.filter(child => child.id !== id),
+        };
+        // 强制触发重新渲染
+        return updatedFolder;
+      });
+
+      // 从搜索结果中移除书签
+      if (searchResults.length > 0) {
+        setSearchResults(prev => {
+          const updatedResults = prev.filter(item => item.id !== id);
+          // 强制触发重新渲染
+          return [...updatedResults];
+        });
+      }
+      
+      // 强制触发重新渲染
+      setTimeout(() => {
+        setCurrentFolder(prev => ({...prev}));
+      }, 0);
+    });
+  };
+
+  const handleUpdateFolder = (id: string, newTitle: string) => {
+    chrome.bookmarks.update(id, { title: newTitle }, () => {
+      // 更新当前文件夹
+      if (id === currentFolder.id) {
+        setCurrentFolder(prev => ({
+          ...prev,
+          title: newTitle,
+        }));
+      }
+
+      // 更新当前文件夹的子文件夹
+      setCurrentFolder(prev => {
+        const updatedFolder = {
+          ...prev,
+          children: prev.children.map(child =>
+            child.id === id ? { ...child, title: newTitle } : child
+          ),
+        };
+        return updatedFolder;
+      });
+
+      // 更新文件夹历史
+      setFolderHistory(prev => {
+        const updatedHistory = prev.map(folder =>
+          folder.id === id ? { ...folder, title: newTitle } : folder
+        );
+        return [...updatedHistory];
+      });
+
+      // 更新搜索结果中的文件夹
+      if (searchResults.length > 0) {
+        setSearchResults(prev => {
+          const updatedResults = prev.map(item =>
+            item.id === id ? { ...item, title: newTitle } : item
+          );
+          return [...updatedResults];
+        });
+      }
+      
+      // 强制触发重新渲染
+      setTimeout(() => {
+        setCurrentFolder(prev => ({...prev}));
+      }, 0);
+    });
+  };
+
+  const handleDeleteFolder = (id: string) => {
+    chrome.bookmarks.removeTree(id, () => {
+      // 从当前文件夹中移除文件夹
+      setCurrentFolder(prev => {
+        const updatedFolder = {
+          ...prev,
+          children: prev.children.filter(child => child.id !== id),
+        };
+        return updatedFolder;
+      });
+
+      // 从搜索结果中移除文件夹
+      if (searchResults.length > 0) {
+        setSearchResults(prev => {
+          const updatedResults = prev.filter(item => item.id !== id);
+          return [...updatedResults];
+        });
+      }
+
+      // 如果删除的是历史记录中的文件夹，需要更新历史记录
+      const folderIndex = folderHistory.findIndex(folder => folder.id === id);
+      if (folderIndex !== -1) {
+        setFolderHistory(prev => {
+          const updatedHistory = prev.filter(folder => folder.id !== id);
+          return [...updatedHistory];
+        });
+      }
+      
+      // 强制触发重新渲染
+      setTimeout(() => {
+        setCurrentFolder(prev => ({...prev}));
+      }, 0);
+    });
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
@@ -187,22 +330,18 @@ function Newtab() {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.card}
-        >
+        <div className={styles.card}>
           <SearchBar
             currentFolder={currentFolder}
             onSearchResult={setSearchResults}
           />
 
-            <div className={styles.header}>
-              <div className={styles.navigation}>
+          <div className={styles.header}>
+            <div className={styles.navigation}>
               {folderHistory.length > 0 && (
-                <button
-                  onClick={handleBack}
-                  className={styles.backButton}
-                >
+                <button onClick={handleBack} className={styles.backButton}>
                   <svg
-                      className={styles.backIcon}
+                    className={styles.backIcon}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -231,9 +370,7 @@ function Newtab() {
                     <span className={styles.breadcrumbSeparator}>/</span>
                   </React.Fragment>
                 ))}
-                <h1 className={styles.currentFolder}>
-                  {currentFolder.title}
-                </h1>
+                <h1 className={styles.currentFolder}>{currentFolder.title}</h1>
               </div>
             </div>
             <ViewToggle view={viewMode} onViewChange={handleViewChange} />
@@ -251,7 +388,11 @@ function Newtab() {
             }}
           >
             <div
-              className={viewMode === "grid" ? styles.gridContainer : styles.listContainer}
+              className={
+                viewMode === "grid"
+                  ? styles.gridContainer
+                  : styles.listContainer
+              }
             >
               <SortableContext
                 items={(searchResults.length > 0
@@ -266,7 +407,12 @@ function Newtab() {
                 ).map((item) => (
                   <SortableItem key={item.id} id={item.id}>
                     {"url" in item ? (
-                      <Link data={item as Bookmark} viewMode={viewMode} />
+                      <Link
+                        data={item as Bookmark}
+                        viewMode={viewMode}
+                        onUpdateBookmark={handleUpdateBookmark}
+                        onDeleteBookmark={handleDeleteBookmark}
+                      />
                     ) : (
                       <Folder
                         folder={item as BookmarkFolder}
@@ -274,6 +420,8 @@ function Newtab() {
                           handleFolderClick(item as BookmarkFolder)
                         }
                         viewMode={viewMode}
+                        onUpdateFolder={handleUpdateFolder}
+                        onDeleteFolder={handleDeleteFolder}
                       />
                     )}
                   </SortableItem>
