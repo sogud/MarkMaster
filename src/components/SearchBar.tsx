@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import { Bookmark, BookmarkFolder } from "../types";
 import styles from "./SearchBar.module.css";
 
@@ -7,10 +7,14 @@ interface SearchBarProps {
   onSearchResult: (results: (Bookmark | BookmarkFolder)[]) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
+export interface SearchBarRef {
+  refreshSearch: () => void;
+}
+
+const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
   currentFolder,
   onSearchResult,
-}) => {
+}, ref) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
@@ -46,6 +50,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
       onSearchResult([]);
     }
   }, [searchTerm, currentFolder]);
+
+  // 使用 useImperativeHandle 暴露方法给父组件
+  useImperativeHandle(ref, () => ({
+    refreshSearch: () => {
+      if (searchTerm) {
+        const results = searchBookmarks(searchTerm, currentFolder);
+        onSearchResult(results);
+      }
+    }
+  }));
 
   return (
     <div className={styles.container}>
@@ -100,6 +114,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       )}
     </div>
   );
-};
+});
 
 export default SearchBar;
